@@ -35,6 +35,6 @@
 	<key>NSAppleEventsUsageDescription</key>
 	<string>CleanM uses AppleScript to run the system purge command with administrator privileges when you choose Free Up RAM.</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>© 2026 CleanM</string>
+	<string>© 2026 Iambulldog. MIT License.</string>
 </dict>
 </plist>

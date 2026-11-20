@@ -13,6 +13,7 @@
   <a href="https://github.com/Iambulldog/cleanM/releases/latest"><img src="https://img.shields.io/github/v/release/Iambulldog/cleanM?color=3a9d5d" alt="Latest release"></a>
   <img src="https://img.shields.io/badge/macOS-14%2B-2e7d4f" alt="macOS 14+">
   <img src="https://img.shields.io/badge/Swift-5.10%2B-6abf69" alt="Swift">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-4caf50" alt="MIT License"></a>
 </p>
 
 ## Features
@@ -99,3 +100,7 @@ The version lives in [`VERSION`](VERSION) and follows [Semantic Versioning](http
 1. Bump `VERSION` (e.g. `1.0.0` → `1.1.0`) and add a section to [`CHANGELOG.md`](CHANGELOG.md).
 2. Commit and push.
 3. Run `PUBLISH=1 ./scripts/release.sh` — it builds a universal (Apple Silicon + Intel) app, zips it into `dist/`, tags `vX.Y.Z` and creates the GitHub release. Installed copies will then see the update.
+
+## License
+
+CleanM is released under the [MIT License](LICENSE).
