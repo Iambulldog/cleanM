@@ -2,6 +2,10 @@
 # Builds CleanM in release mode and assembles a signed (ad-hoc) CleanM.app bundle in ./build
 #   CONFIG=debug ./scripts/build-app.sh   → debug build
 #   UNIVERSAL=1 ./scripts/build-app.sh    → arm64 + x86_64 binary
+#   SIGN_IDENTITY="Developer ID Application: Name (TEAMID)" ./scripts/build-app.sh
+#                                         → sign for distribution (hardened runtime + timestamp)
+# Without SIGN_IDENTITY, a "Developer ID Application" certificate in the keychain is used
+# automatically; if there is none, the app is ad-hoc signed (fine for local use).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -40,10 +44,22 @@ PLIST="$APP_DIR/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$PLIST"
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "$PLIST"
 
-echo "▸ Codesigning (ad-hoc)"
-codesign --force --deep -s - \
-  --entitlements "$ROOT/Resources/CleanM.entitlements" \
-  "$APP_DIR"
+if [[ -z "${SIGN_IDENTITY:-}" ]]; then
+  SIGN_IDENTITY="$(security find-identity -v -p codesigning 2>/dev/null \
+    | sed -n 's/.*"\(Developer ID Application: .*\)"/\1/p' | head -1)"
+fi
 
-codesign --verify --verbose=1 "$APP_DIR"
+if [[ -n "$SIGN_IDENTITY" && "$SIGN_IDENTITY" != "-" ]]; then
+  echo "▸ Codesigning with: $SIGN_IDENTITY (hardened runtime)"
+  codesign --force --options runtime --timestamp \
+    --entitlements "$ROOT/Resources/CleanM.entitlements" \
+    -s "$SIGN_IDENTITY" "$APP_DIR"
+else
+  echo "▸ Codesigning (ad-hoc — no Developer ID certificate found)"
+  codesign --force -s - --options runtime \
+    --entitlements "$ROOT/Resources/CleanM.entitlements" \
+    "$APP_DIR"
+fi
+
+codesign --verify --strict --verbose=1 "$APP_DIR"
 echo "✓ Built $APP_DIR (v$VERSION, build $BUILD_NUMBER)"

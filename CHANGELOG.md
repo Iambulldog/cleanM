@@ -5,6 +5,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Added
+- Release pipeline signs with Developer ID (hardened runtime + secure timestamp), notarizes and staples automatically when a certificate and `notarytool` profile are available.
+
 ## [1.0.0] - 2026-11-20
 
 ### Added

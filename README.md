@@ -32,7 +32,7 @@
 
 1. Download `CleanM-x.y.z.zip` from the [latest release](https://github.com/Iambulldog/cleanM/releases/latest).
 2. Unzip it and drag **CleanM.app** into **Applications**.
-3. CleanM is not notarized by Apple, so the first launch is blocked. Either:
+3. If the release notes say the build is **not notarized**, macOS blocks the first launch. Either:
    - open **System Settings → Privacy & Security**, scroll down and click **Open Anyway**, or
    - run once in Terminal:
      ```bash
@@ -99,7 +99,20 @@ The version lives in [`VERSION`](VERSION) and follows [Semantic Versioning](http
 
 1. Bump `VERSION` (e.g. `1.0.0` → `1.1.0`) and add a section to [`CHANGELOG.md`](CHANGELOG.md).
 2. Commit and push.
-3. Run `PUBLISH=1 ./scripts/release.sh` — it builds a universal (Apple Silicon + Intel) app, zips it into `dist/`, tags `vX.Y.Z` and creates the GitHub release. Installed copies will then see the update.
+3. Run `PUBLISH=1 ./scripts/release.sh` — it builds a universal (Apple Silicon + Intel) app, signs it, notarizes it (when set up, see below), zips it into `dist/`, tags `vX.Y.Z` and creates the GitHub release. Installed copies will then see the update.
+
+### Notarization
+
+Notarized builds open with no Gatekeeper warning. It needs a paid [Apple Developer Program](https://developer.apple.com/programs/) membership. One-time setup:
+
+1. **Create the certificate.** Xcode → Settings → Accounts → select your team → *Manage Certificates…* → **+** → **Developer ID Application**. It lands in your login keychain; `build-app.sh` picks it up automatically (or set `SIGN_IDENTITY`).
+2. **Create an app-specific password** at [account.apple.com](https://account.apple.com) → Sign-In and Security → App-Specific Passwords.
+3. **Store notary credentials** (you type the password into the prompt; it is kept in your keychain):
+   ```bash
+   xcrun notarytool store-credentials CleanM-notary --apple-id <your Apple ID> --team-id <TEAMID>
+   ```
+   Your Team ID is shown at [developer.apple.com/account](https://developer.apple.com/account) → Membership details.
+4. Release as usual: `PUBLISH=1 ./scripts/release.sh`. The script signs with hardened runtime and a secure timestamp, submits to Apple's notary service, staples the ticket and verifies it with `spctl`. Use `REQUIRE_NOTARIZATION=1` to make the release fail rather than ship an un-notarized build.
 
 ## License
 
